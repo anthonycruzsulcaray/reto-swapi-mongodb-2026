@@ -10,7 +10,7 @@ export class FilmService {
         return await this.filmRepository.getListFilms();
     }
 
-    async getFilmById(id: number): Promise<FilmBodySpanish> | null {
+    async getFilmById(id: number): Promise<FilmBodySpanish | null> {
         return await this.filmRepository.getFilmById(id);
 
     }
