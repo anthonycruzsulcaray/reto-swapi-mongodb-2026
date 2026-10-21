@@ -1,12 +1,14 @@
-import { FilmBodySpanish, FilmBodyEnglish } from "../../domain/entities/film.entities";
-import { FilmRepository } from "../../domain/repository/film.repository";
-import { MongoDataBase } from "../database/dynamo.connection";
+import { Injectable } from "@nestjs/common";
+import { FilmBodySpanish, FilmBodyEnglish } from "../../../../domain/entities/film.entities";
+import { FilmRepository } from "../../../../domain/repository/film.repository";
 
-
-export class DynamoRepository implements FilmRepository {
+@Injectable()
+export class FilmMongoRepository implements FilmRepository {
     constructor(
-        private readonly dynamoDatabase: MongoDataBase,
+        // private readonly dynamoDatabase: MongoDataBase,
     ) {
+
+        
 
     }
     getListFilms(): Promise<FilmBodySpanish[]> {

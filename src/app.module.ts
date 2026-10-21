@@ -1,10 +1,24 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { StarwarsController } from './reto-swapi/presentation/starwars.controller';
+import { FilmService } from './reto-swapi/application/service/film.service';
+import { StarWarsService } from './reto-swapi/application/service/starwars.service';
+import { MongooseModule } from '@nestjs/mongoose';
+import { FilmModule } from './reto-swapi/infrastructure/module/film.module';
+import { ConfigModule } from '@nestjs/config';
+
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    MongooseModule.forRoot('mongodb://localhost/27017', {
+      minPoolSize: 1,
+      maxPoolSize: 2,
+      maxIdleTimeMS: 5 * 60 * 1000,
+      dbName: process.env.MONGO_DB,
+      autoIndex: false
+    }),
+    FilmModule],
+  controllers: [StarwarsController],
+  providers: [FilmService, StarWarsService],
 })
-export class AppModule {}
+export class AppModule { }
