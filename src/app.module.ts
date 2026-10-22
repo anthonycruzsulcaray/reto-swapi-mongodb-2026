@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { StarwarsController } from './reto-swapi/presentation/starwars.controller';
 import { FilmService } from './reto-swapi/application/service/film.service';
-import { StarWarsService } from './reto-swapi/application/service/starwars.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { FilmModule } from './reto-swapi/infrastructure/module/film.module';
 import { ConfigModule } from '@nestjs/config';
@@ -19,6 +18,7 @@ import { ConfigModule } from '@nestjs/config';
     }),
     FilmModule],
   controllers: [StarwarsController],
-  providers: [FilmService, StarWarsService],
+  providers: [FilmService]
+  //  exports: [FILM_REPOSITORY]
 })
 export class AppModule { }

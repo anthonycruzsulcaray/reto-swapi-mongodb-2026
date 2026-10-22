@@ -11,16 +11,16 @@ export class FilmService {
         private readonly filmRepository: FilmRepository,
     ) { }
 
-    async getListFilms(): Promise<FilmBodySpanish[]> {
+    async getListFilms(): Promise<FilmBodyEnglish[]> {
         return await this.filmRepository.getListFilms();
     }
 
-    async getFilmById(id: number): Promise<FilmBodySpanish | null> {
+    async getFilmById(id: number): Promise<FilmBodyEnglish | null> {
         return await this.filmRepository.getFilmById(id);
 
     }
 
-    async createFilm(film: FilmBodyEnglish): Promise<FilmBodySpanish | null> {
+    async createFilm(film: FilmBodyEnglish): Promise<FilmBodyEnglish | null> {
         return await this.filmRepository.createFilm(film);
 
     }

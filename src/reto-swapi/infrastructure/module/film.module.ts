@@ -4,6 +4,7 @@ import { FilmMongo, FilmShchema } from '../persistence/mongodb/schemas/film.sche
 // import { StarwarsController } from '../../presentation/starwars.controller';
 import { FilmMongoRepository } from '../persistence/mongodb/repository/film.mongodb.repository';
 import { FILM_REPOSITORY } from '../../domain/repository/film.repository';
+import { FilmQueryDocument } from '../persistence/mongodb/query/film.query';
 
 
 @Module({
@@ -12,10 +13,14 @@ import { FILM_REPOSITORY } from '../../domain/repository/film.repository';
             { name: FilmMongo.name, schema: FilmShchema }
         ])
     ],
-    // controllers: [StarwarsController],
-    providers: [{
-        provide: FILM_REPOSITORY,
-        useClass: FilmMongoRepository,
-    }]
+    controllers: [],
+    providers: [
+        FilmQueryDocument,
+        {
+            provide: FILM_REPOSITORY,
+            useClass: FilmMongoRepository,
+        }
+    ],
+    exports: [FILM_REPOSITORY]
 })
 export class FilmModule { }
