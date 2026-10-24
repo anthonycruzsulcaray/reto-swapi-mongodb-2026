@@ -1,23 +1,28 @@
 import { Injectable } from "@nestjs/common";
-import { FilmBodyEnglish } from "../../../../domain/entities/film.entities";
-import { FilmRepository } from "../../../../domain/repository/film.repository";
-import { FilmQueryDocument } from "../query/film.query";
-import { FilmMongo } from "../schemas/film.schema";
+import { FilmBodyEnglish } from "../../domain/entities/film.entities";
+import { FilmMongo } from "../persistence/mongodb/schemas/film.schema";
+import { FilmQueryMongoDB } from "../persistence/mongodb/query/film.query";
+import { FilmRepository } from "../../domain/repository/film.repository";
+import { FilmQueryMysql } from "../persistence/mysql/query/film.query";
+import { OkPacket } from "../persistence/mysql/entity/mysql.entity";
+
 
 @Injectable()
-export class FilmMongoRepository implements FilmRepository {
+export class HybridFilmRepository implements FilmRepository {
     constructor(
-        private readonly filmquery: FilmQueryDocument
+        private readonly filmMongoDB: FilmQueryMongoDB,
+        private readonly filmMysql: FilmQueryMysql
     ) { }
 
-    async getListFilms(): Promise<FilmBodyEnglish[]> {
+    async getListFilms() {
         const response: FilmBodyEnglish[] = []
-        const filmArray: FilmMongo[] = (await this.filmquery.find({})) ?? [];
+        const filmArray: FilmMongo[] = (await this.filmMongoDB.find({})) ?? [];
         response.push(...filmArray)
         return filmArray
     }
+
     async getFilmById(filmId: number): Promise<FilmBodyEnglish | null> {
-        const film: FilmMongo | null = await this.filmquery.findOne({ id: filmId })
+        const film: FilmMongo | null = await this.filmMongoDB.findOne({ id: filmId })
         if (film === null) {
             return null
         }
@@ -40,9 +45,14 @@ export class FilmMongoRepository implements FilmRepository {
         }
         return response
     }
+
     async createFilm(film: FilmBodyEnglish): Promise<FilmBodyEnglish | null> {
         // await Promise.all(["funciones de querys"])
-        await this.filmquery.addNewFilm(film);
+        // let conn = (await this.filmMysql.init()).transaction()
+        let resultDao: OkPacket = await this.filmMysql.addFilm(film.episode_id, film.title)
+        console.log("resultDao::: ", resultDao)
+        film.id = resultDao.insertId ?? 0
+        await this.filmMongoDB.addNewFilm(film);
         return film
     }
 

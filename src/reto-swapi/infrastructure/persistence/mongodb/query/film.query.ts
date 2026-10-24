@@ -6,7 +6,7 @@ import { EntityRepository } from "../document/entity.document";
 
 
 @Injectable()
-export class FilmQueryDocument extends EntityRepository<FilmDocument> {
+export class FilmQueryMongoDB extends EntityRepository<FilmDocument> {
     constructor(@InjectModel(FilmMongo.name) filmModel: Model<FilmDocument>) {
         super(filmModel)
     }

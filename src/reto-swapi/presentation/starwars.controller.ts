@@ -16,7 +16,7 @@ export class StarwarsController {
 
     @Post('mongo/films')
     @HttpCode(201)
-    async addDynamoFilm(@Body() requestBody: FilmBodyEnglish): Promise<FilmBodyEnglish | null> {
+    async addMongoFilm(@Body() requestBody: FilmBodyEnglish): Promise<FilmBodyEnglish | null> {
         return await this.filmService.createFilm(requestBody);
     }
 
