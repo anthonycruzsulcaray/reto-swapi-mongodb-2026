@@ -4,7 +4,7 @@ import { FilmMongo } from "../persistence/mongodb/schemas/film.schema";
 import { FilmQueryMongoDB } from "../persistence/mongodb/query/film.query";
 import { FilmRepository } from "../../domain/repository/film.repository";
 import { FilmQueryMysql } from "../persistence/mysql/query/film.query";
-import { OkPacket } from "../persistence/mysql/entity/mysql.entity";
+import { Film, OkPacket } from "../persistence/mysql/entity/mysql.entity";
 
 
 @Injectable()
@@ -46,14 +46,39 @@ export class HybridFilmRepository implements FilmRepository {
         return response
     }
 
-    async createFilm(film: FilmBodyEnglish): Promise<FilmBodyEnglish | null> {
+    async createFilm(rq: FilmBodyEnglish): Promise<FilmBodyEnglish | null> {
         // await Promise.all(["funciones de querys"])
         // let conn = (await this.filmMysql.init()).transaction()
-        let resultDao: OkPacket = await this.filmMysql.addFilm(film.episode_id, film.title)
-        console.log("resultDao::: ", resultDao)
-        film.id = resultDao.insertId ?? 0
-        await this.filmMongoDB.addNewFilm(film);
-        return film
+        let conn = (await this.filmMysql.init()).transaction()
+        try {
+            let requestBody: Film = {
+                id: 0,
+                episode_id: rq.id,
+                title: rq.title,
+                opening_crawl: rq.opening_crawl,
+                director: rq.director,
+                producer: rq.producer,
+                release_date: rq.release_date,
+                created: rq.created,
+                edited: rq.edited,
+                url: rq.url
+            }
+            conn = this.filmMysql.addFilm(requestBody, conn)
+            rq.characters.forEach(value => {
+                conn = this.filmMysql.addCharacters(value, conn)
+            });
+
+            
+            const data = await conn.commit();
+            const indexFilmId = 0
+            const orderId = data[indexFilmId].insertId
+            rq.id = orderId
+            await this.filmMongoDB.addNewFilm(rq);
+            return rq
+        } catch (error) {
+            conn.rollback((_e: unknown) => { })
+            throw error
+        }
     }
 
 }

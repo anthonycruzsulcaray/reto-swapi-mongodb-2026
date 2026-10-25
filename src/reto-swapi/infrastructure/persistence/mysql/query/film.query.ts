@@ -2,7 +2,7 @@ import serverlessMysql from "serverless-mysql";
 import { MysqlConfigReader } from "../connection/mysqlConnectReader";
 import { MysqlConfigWriter } from "../connection/mysqlConnectWriter";
 import { Injectable } from "@nestjs/common";
-import { OkPacket } from "../entity/mysql.entity";
+import { Characters, Film, OkPacket, Planets, Species, Starships, Vehicles } from "../entity/mysql.entity";
 
 @Injectable()
 export class FilmQueryMysql {
@@ -27,15 +27,48 @@ export class FilmQueryMysql {
 
 
     async getListFilms(idFilm: number) {
-        return await this.connReader.query("SELECT * FROM film WHERE id=? ORDER BY id DESC", [idFilm]);
+        return await this.connReader.query("SELECT * FROM film WHERE id=?", [idFilm]);
     }
-
-
-    async addFilm(episode_id: number, title: string): Promise<OkPacket> {
-        return (await this.connWriter.query<OkPacket>(
-            "INSERT INTO film (episode_id, title) VALUES (?,?)",
-            [episode_id, title]
-        ));
+    addFilm = (film: Film, connection: serverlessMysql.Transaction) => {
+        return connection.query(
+            " INSERT INTO film (episode_id, title, opening_crawl, director, producer, release_date, created, edited, url) " +
+            " VALUES (?,?,?,?,?,?,?,?,?)",
+            [film.episode_id, film.title, film.opening_crawl, film.director, film.producer, film.release_date, film.created, film.edited, film.url]
+        );
+    }
+    addCharacters = (value: string, connection: serverlessMysql.Transaction) => {
+        return connection.query((_lastResult: any, allResult: any) => {
+            return [
+                "INSERT INTO characters (value, id_film) VALUES (?,?)",
+                [value, allResult[0].insertId]
+            ]
+        });
+    }
+    addPlanets = (value: string, connection: serverlessMysql.Transaction) => {
+        return connection.query((_lastResult: any, allResult: any) => {
+            return [
+                "INSERT INTO planets (value, id_film) VALUES (?,?)",
+                [value, allResult[0].insertId]
+            ]
+        });
+    }
+    addStarships = (value: string, connection: serverlessMysql.Transaction) => {
+        return connection.query((_lastResult: any, allResult: any) => {
+            return ["INSERT INTO starships (value, id_film) VALUES (?,?)",
+                [value, allResult[0].insertId]]
+        });
+    }
+    addVehicles = (value: string, connection: serverlessMysql.Transaction) => {
+        return connection.query((_lastResult: any, allResult: any) => {
+            return ["INSERT INTO vehicles (value, id_film) VALUES (?,?)",
+                [value, allResult[0].insertId]]
+        });
+    }
+    addSpecies = (value: string, connection: serverlessMysql.Transaction) => {
+        return connection.query((_lastResult: any, allResult: any) => {
+            return ["INSERT INTO species (value, id_film) VALUES (?,?)",
+                [value, allResult[0].insertId]]
+        });
     }
 
 }
