@@ -1,13 +1,11 @@
 import { Module } from '@nestjs/common';
-import { MysqlConfigReader } from '../persistence/mysql/connection/mysqlConnectReader';
 import { FilmQueryMysql } from '../persistence/mysql/query/film.query';
-import { MysqlConfigWriter } from '../persistence/mysql/connection/mysqlConnectWriter';
+import { MysqlConfig } from '../persistence/mysql/connection/mysqlConnect';
 @Module({
     imports: [],
     controllers: [],
     providers: [
-        MysqlConfigReader,
-        MysqlConfigWriter,
+        MysqlConfig,
         FilmQueryMysql
     ],
     exports: [

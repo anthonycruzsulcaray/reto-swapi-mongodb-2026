@@ -14,11 +14,30 @@ export class HybridFilmRepository implements FilmRepository {
         private readonly filmMysql: FilmQueryMysql
     ) { }
 
-    async getListFilms() {
+    async getListFilms(): Promise<FilmBodyEnglish[]> {
         const response: FilmBodyEnglish[] = []
         const filmArray: FilmMongo[] = (await this.filmMongoDB.find({})) ?? [];
-        response.push(...filmArray)
-        return filmArray
+        // response.push(...filmArray)
+        filmArray.forEach(data => {
+            response.push({
+                id: data.id,
+                episode_id: data.episode_id,
+                title: data.title,
+                opening_crawl: data.opening_crawl,
+                director: data.director,
+                producer: data.producer,
+                release_date: data.release_date,
+                characters: data.characters,
+                planets: data.planets,
+                starships: data.starships,
+                vehicles: data.vehicles,
+                species: data.species,
+                created: data.created,
+                edited: data.edited,
+                url: data.url
+            })
+        });
+        return response
     }
 
     async getFilmById(filmId: number): Promise<FilmBodyEnglish | null> {
@@ -47,13 +66,11 @@ export class HybridFilmRepository implements FilmRepository {
     }
 
     async createFilm(rq: FilmBodyEnglish): Promise<FilmBodyEnglish | null> {
-        // await Promise.all(["funciones de querys"])
-        // let conn = (await this.filmMysql.init()).transaction()
         let conn = (await this.filmMysql.init()).transaction()
         try {
             let requestBody: Film = {
                 id: 0,
-                episode_id: rq.id,
+                episode_id: rq.episode_id,
                 title: rq.title,
                 opening_crawl: rq.opening_crawl,
                 director: rq.director,
@@ -63,12 +80,24 @@ export class HybridFilmRepository implements FilmRepository {
                 edited: rq.edited,
                 url: rq.url
             }
+
             conn = this.filmMysql.addFilm(requestBody, conn)
             rq.characters.forEach(value => {
-                conn = this.filmMysql.addCharacters(value, conn)
+                conn = this.filmMysql.addFilmCharacters(value, conn)
+            });
+            rq.planets.forEach(value => {
+                conn = this.filmMysql.addFilmPlanets(value, conn)
+            });
+            rq.starships.forEach(value => {
+                conn = this.filmMysql.addFilmStarships(value, conn)
+            });
+            rq.vehicles.forEach(value => {
+                conn = this.filmMysql.addFilmVehicles(value, conn)
+            });
+            rq.species.forEach(value => {
+                conn = this.filmMysql.addFilmSpecies(value, conn)
             });
 
-            
             const data = await conn.commit();
             const indexFilmId = 0
             const orderId = data[indexFilmId].insertId

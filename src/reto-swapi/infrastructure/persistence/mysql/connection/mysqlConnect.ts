@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class MysqlConfigReader {
+export class MysqlConfig {
     constructor(
         private configService: ConfigService,
     ) { }
@@ -23,6 +23,3 @@ export class MysqlConfigReader {
     }
 
 }
-
-
-
