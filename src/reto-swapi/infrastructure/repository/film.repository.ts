@@ -5,7 +5,8 @@ import { FilmQueryMongoDB } from "../persistence/mongodb/query/film.query";
 import { FilmRepository } from "../../domain/repository/film.repository";
 import { FilmQueryMysql } from "../persistence/mysql/query/film.query";
 import { v4 as uuidv4 } from 'uuid';
-import { Schema } from "joi"
+import { JoiValidationPipe } from "../validation"
+import { PageFilterSchema } from "./film.validation";
 
 @Injectable()
 export class HybridFilmRepository implements FilmRepository {
@@ -16,10 +17,9 @@ export class HybridFilmRepository implements FilmRepository {
 
     async getListFilms(headers: any): Promise<FilmBodyPaged> {
         let idTransaccion = uuidv4();
-
-        // new JoiValidationPipe(PageFilterSchema).transform({ page, size }, idTransaccion)
         let page: number = Number(headers.page ?? 1)
         let size: number = Number(headers.size ?? 10)
+        new JoiValidationPipe(PageFilterSchema).transform({ page, size }, idTransaccion)
 
         let response: FilmBodyPaged = {
             count: 0,
