@@ -1,5 +1,5 @@
-import { Body, Controller, Get, HttpCode, Param, Post } from "@nestjs/common";
-import { FilmBodyEnglish } from "../domain/entities/film.entities";
+import { Body, Controller, Get, HttpCode, Param, Post, Headers } from "@nestjs/common";
+import { FilmBodyEnglish, FilmBodyPaged } from "../domain/entities/film.entities";
 import { FilmService } from "../application/service/film.service";
 
 @Controller('starwars')
@@ -10,8 +10,8 @@ export class StarwarsController {
 
     @Get('mongo/films')
     @HttpCode(200)
-    async getlistFilms(): Promise<FilmBodyEnglish[]> {
-        return await this.filmService.getListFilms()
+    async getlistFilms(@Headers() headers: any): Promise<FilmBodyPaged> {
+        return await this.filmService.getListFilms(headers)
     }
 
     @Post('mongo/films')

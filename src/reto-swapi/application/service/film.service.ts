@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { FilmBodyEnglish, FilmBodySpanish } from "../../domain/entities/film.entities";
+import { FilmBodyEnglish, FilmBodyPaged, FilmBodySpanish } from "../../domain/entities/film.entities";
 // import * as filmRepository from "../../domain/repository/film.repository"
 import { FILM_REPOSITORY } from "../../domain/repository/film.repository"
 import type { FilmRepository } from "../../domain/repository/film.repository"
@@ -11,8 +11,8 @@ export class FilmService {
         private readonly filmRepository: FilmRepository,
     ) { }
 
-    async getListFilms(): Promise<FilmBodyEnglish[]> {
-        return await this.filmRepository.getListFilms();
+    async getListFilms(headers: any): Promise<FilmBodyPaged> {
+        return await this.filmRepository.getListFilms(headers);
     }
 
     async getFilmById(id: number): Promise<FilmBodyEnglish | null> {

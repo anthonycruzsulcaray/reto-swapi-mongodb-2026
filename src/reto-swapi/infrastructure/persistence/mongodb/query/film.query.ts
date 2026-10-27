@@ -19,24 +19,15 @@ export class FilmQueryMongoDB extends EntityRepository<FilmDocument> {
         return this.entityModel.countDocuments(filter)
     }
     */
-
-    // AGREGAR
+    getCountTotalFilms() {
+        return this.entityModel.countDocuments()
+    }
+    getListFilmsByPaged(page: number, size: number) {
+        const skip = (page - 1) * size;
+        return this.entityModel.find().skip(skip).limit(size).exec()
+    }
     addNewFilm(request: FilmMongo) {
         return this.entityModel.create(request)
     }
-    /*
-    // EDITAR
-    editAddres(idUser: number, idAddressStreet: number, request: FilmMongo) {
-        return this.entityModel.findOneAndUpdate(
-            { userId: idUser, id: idAddressStreet }, {
-            $set: request
-        }).exec();
-    }
-
-    // ELIMINAR
-    deleteAddressStret(idAddressStreet: number) {
-        return this.entityModel.findOneAndDelete({ id: idAddressStreet }).exec();
-    }
-    */
 
 }
