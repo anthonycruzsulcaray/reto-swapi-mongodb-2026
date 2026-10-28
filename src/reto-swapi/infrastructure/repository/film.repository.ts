@@ -27,9 +27,6 @@ export class HybridFilmRepository implements FilmRepository {
             results: []
         }
         const totalRecord = (await this.filmMongoDB.getCountTotalFilms());
-        if (totalRecord == 0) {
-            return response
-        }
         const totalNumberPages = Math.ceil(totalRecord / size);
         const filmResponse: FilmMongo[] = (await this.filmMongoDB.getListFilmsByPaged(page, size));
 
