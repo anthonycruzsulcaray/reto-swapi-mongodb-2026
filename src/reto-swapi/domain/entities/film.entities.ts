@@ -6,6 +6,12 @@ export class FilmBodyPagedEnglish {
     results: FilmBodyEnglish[]
 }
 
+export class FilmBodyPaged {
+    count: number
+    pages: number
+    results: FilmBodyEnglish[]
+}
+
 
 export class FilmBodyEnglish {
     id: number
