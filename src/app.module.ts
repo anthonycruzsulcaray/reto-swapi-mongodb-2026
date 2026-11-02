@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { StarwarsController } from './reto-swapi/presentation/starwars.controller';
+import { StarwarsController } from './reto-swapi/infrastructure/controllers/starwars.controller';
 import { FilmService } from './reto-swapi/application/service/film.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MongoModule } from './reto-swapi/infrastructure/module/mongo.module';
@@ -8,10 +8,15 @@ import configuration from './app.properties'
 import { MysqlModule } from './reto-swapi/infrastructure/module/mysql.module';
 import { FILM_REPOSITORY } from './reto-swapi/domain/repository/film.repository';
 import { HybridFilmRepository } from './reto-swapi/infrastructure/repository/film.repository';
+import { StarWarsService } from './reto-swapi/application/service/starwars.service';
+import { STARWARS_REPOSITORY } from './reto-swapi/domain/repository/starwars.repository';
+import { StarwarsApiRest } from './reto-swapi/infrastructure/persistence/api/swapi.api';
+import { HttpModule } from '@nestjs/axios';
 
 
 @Module({
   imports: [
+    HttpModule,
     ConfigModule.forRoot({
       load: [configuration],
       isGlobal: true
@@ -25,12 +30,19 @@ import { HybridFilmRepository } from './reto-swapi/infrastructure/repository/fil
     }),
     MongoModule, MysqlModule],
   controllers: [StarwarsController],
-  providers: [FilmService,
-    {
-      provide: FILM_REPOSITORY,
-      useClass: HybridFilmRepository
-    }
-  ],
+  providers:
+    [
+      FilmService,
+      {
+        provide: FILM_REPOSITORY,
+        useClass: HybridFilmRepository
+      },
+      StarWarsService,
+      {
+        provide: STARWARS_REPOSITORY,
+        useClass: StarwarsApiRest
+      }
+    ],
   exports: [FILM_REPOSITORY]
 
 })

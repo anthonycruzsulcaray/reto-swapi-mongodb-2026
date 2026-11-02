@@ -13,9 +13,9 @@ export class StarWarsService {
     async getListStarwars(): Promise<FilmBodyPagedEnglish> {
         return await this.starwarsRepository.getListStarwars();
     }
-
-    async getStarwarsById(): Promise<FilmBodyEnglish | null> {
-        return await this.starwarsRepository.getStarwarsById();
+    
+    async getStarwarsById(id: number): Promise<FilmBodyEnglish | null> {
+        return await this.starwarsRepository.getStarwarsById(id);
     }
 
 

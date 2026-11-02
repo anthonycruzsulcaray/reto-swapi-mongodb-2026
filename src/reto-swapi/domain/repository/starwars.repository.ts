@@ -4,5 +4,5 @@ export const STARWARS_REPOSITORY = Symbol('STARWARS_REPOSITORY');
 
 export interface StarwarsRepository {
     getListStarwars(): Promise<FilmBodyPagedEnglish>;
-    getStarwarsById(): Promise<FilmBodyEnglish | null>;
+    getStarwarsById(id: number): Promise<FilmBodyEnglish | null>;
 }
