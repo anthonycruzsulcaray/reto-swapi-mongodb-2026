@@ -8,11 +8,12 @@ export class MysqlConfig {
         private configService: ConfigService,
     ) { }
 
-    conn(_database?: string): ServerlessMysql {
-        // console.log("database :::", database)
+    conn(database?: string): ServerlessMysql {
         let configParameters = this.configService.get("mysqlParamters");
-
-        let configMysql = {
+        if (database) {
+            configParameters.database = database;
+        }
+        const configMysql = {
             config: configParameters,
             backoff: "10",
             zombieMaxTimeout: 120,

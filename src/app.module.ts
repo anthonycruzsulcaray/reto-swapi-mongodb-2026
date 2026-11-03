@@ -12,7 +12,8 @@ import { StarWarsService } from './reto-swapi/application/service/starwars.servi
 import { STARWARS_REPOSITORY } from './reto-swapi/domain/repository/starwars.repository';
 import { StarwarsApiRest } from './reto-swapi/infrastructure/persistence/api/swapi.api';
 import { HttpModule } from '@nestjs/axios';
-
+import { AuthModule } from './reto-swapi/infrastructure/module/auth.module';
+import { JwtAuthGuard } from './reto-swapi/infrastructure/guards/jwt-auth.guard';
 
 @Module({
   imports: [
@@ -28,7 +29,7 @@ import { HttpModule } from '@nestjs/axios';
       dbName: process.env.MONGO_DB,
       autoIndex: false
     }),
-    MongoModule, MysqlModule],
+    MongoModule, MysqlModule, AuthModule],
   controllers: [StarwarsController],
   providers:
     [
@@ -38,6 +39,7 @@ import { HttpModule } from '@nestjs/axios';
         useClass: HybridFilmRepository
       },
       StarWarsService,
+      JwtAuthGuard,
       {
         provide: STARWARS_REPOSITORY,
         useClass: StarwarsApiRest

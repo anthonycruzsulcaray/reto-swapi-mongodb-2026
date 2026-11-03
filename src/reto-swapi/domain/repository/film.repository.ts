@@ -1,4 +1,4 @@
-import { FilmBodyEnglish, FilmBodyPaged, FilmBodySpanish } from "../entities/film.entities";
+import { FilmBodyEnglish, FilmBodyPaged } from "../entities/film.entities";
 
 export const FILM_REPOSITORY = Symbol('FILM_REPOSITORY');
 

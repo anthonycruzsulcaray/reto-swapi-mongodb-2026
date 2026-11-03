@@ -1,9 +1,11 @@
-import { Body, Controller, Get, HttpCode, Param, Post, Headers } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, Param, Post, Headers, UseGuards } from "@nestjs/common";
 import { FilmBodyEnglish, FilmBodyPaged, FilmBodyPagedEnglish } from "../../domain/entities/film.entities";
 import { FilmService } from "../../application/service/film.service";
 import { StarWarsService } from "../../application/service/starwars.service";
+import { JwtAuthGuard } from "../guards/jwt-auth.guard";
 
 @Controller('starwars')
+@UseGuards(JwtAuthGuard)
 export class StarwarsController {
     constructor(
         private readonly filmService: FilmService,
@@ -24,19 +26,19 @@ export class StarwarsController {
 
     @Post('films')
     @HttpCode(201)
-    async addMongoFilm(@Body() requestBody: FilmBodyEnglish): Promise<FilmBodyEnglish | null> {
+    async addFilm(@Body() requestBody: FilmBodyEnglish): Promise<FilmBodyEnglish | null> {
         return await this.filmService.createFilm(requestBody);
     }
 
     @Get('api/films')
     @HttpCode(200)
-    async listFilms(): Promise<FilmBodyPagedEnglish> {
+    async getListApiFilms(): Promise<FilmBodyPagedEnglish> {
         return await this.starwarsService.getListStarwars();
     }
 
     @Get('api/films/:id')
     @HttpCode(200)
-    async listFilmsById(@Param('id') id: string): Promise<FilmBodyEnglish | null> {
+    async getListApiFilmsById(@Param('id') id: string): Promise<FilmBodyEnglish | null> {
         return await this.starwarsService.getStarwarsById(+id);
     }
 }

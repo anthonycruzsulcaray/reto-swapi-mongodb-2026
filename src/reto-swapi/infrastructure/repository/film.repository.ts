@@ -5,7 +5,7 @@ import { FilmQueryMongoDB } from "../persistence/mongodb/query/film.query";
 import { FilmRepository } from "../../domain/repository/film.repository";
 import { FilmQueryMysql } from "../persistence/mysql/query/film.query";
 import { v4 as uuidv4 } from 'uuid';
-import { JoiValidationPipe } from "../utils/validation"
+import { JoiValidationPipe } from "../utils/validation/joi"
 import { CreateFilmSchema, PageFilterSchema } from "../validation/film.validation";
 
 @Injectable()

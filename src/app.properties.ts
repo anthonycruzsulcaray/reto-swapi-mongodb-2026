@@ -1,9 +1,14 @@
 export default () => ({
     mysqlParamters: {
         host: process.env.HOST,
-        port: process.env.PORT ?? 3306,
+        port: Number(process.env.PORT),
         user: process.env.USER_DB,
         password: process.env.PASSWORD_DB,
         database: process.env.DATABASE
+    },
+    auth: {
+        jwtSecret: process.env.JWT_SECRET,
+        jwtExpirationSeconds: Number(process.env.JWT_EXPIRATION_SECONDS)
     }
+
 });

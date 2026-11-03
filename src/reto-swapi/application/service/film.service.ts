@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { FilmBodyEnglish, FilmBodyPaged, FilmBodySpanish } from "../../domain/entities/film.entities";
+import { FilmBodyEnglish, FilmBodyPaged } from "../../domain/entities/film.entities";
 // import * as filmRepository from "../../domain/repository/film.repository"
 import { FILM_REPOSITORY } from "../../domain/repository/film.repository"
 import type { FilmRepository } from "../../domain/repository/film.repository"
