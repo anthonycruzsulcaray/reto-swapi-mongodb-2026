@@ -1,63 +1,20 @@
 import { Module } from '@nestjs/common';
-import { StarwarsController } from './reto-swapi/infrastructure/controllers/starwars.controller';
-import { FilmService } from './reto-swapi/application/service/film.service';
-import { MongooseModule } from '@nestjs/mongoose';
-import { MongoModule } from './reto-swapi/infrastructure/module/mongo.module';
 import { ConfigModule } from '@nestjs/config';
-import configuration from './app.properties'
-import { MysqlModule } from './reto-swapi/infrastructure/module/mysql.module';
-import { FILM_REPOSITORY } from './reto-swapi/domain/repository/film.repository';
-import { HybridFilmRepository } from './reto-swapi/infrastructure/repository/film.repository';
-import { StarWarsService } from './reto-swapi/application/service/starwars.service';
-import { STARWARS_REPOSITORY } from './reto-swapi/domain/repository/starwars.repository';
-import { StarwarsApiRest } from './reto-swapi/infrastructure/persistence/api/swapi.api';
-import { HttpModule } from '@nestjs/axios';
+import configuration from './app.properties';
 import { AuthModule } from './reto-swapi/infrastructure/module/auth.module';
-import { JwtAuthGuard } from './reto-swapi/infrastructure/guards/jwt-auth.guard';
+import { AuthController } from './reto-swapi/infrastructure/controllers/auth.controller';
+import { StarwarsController } from './reto-swapi/infrastructure/controllers/starwars.controller';
+import { StarwarsModule } from './reto-swapi/infrastructure/module/starwars.module';
 
 @Module({
   imports: [
-    HttpModule,
     ConfigModule.forRoot({
       load: [configuration],
       isGlobal: true
     }),
-    MongooseModule.forRoot('mongodb://localhost/27017', {
-      minPoolSize: 1,
-      maxPoolSize: 2,
-      maxIdleTimeMS: 5 * 60 * 1000,
-      dbName: process.env.MONGO_DB,
-      autoIndex: false
-    }),
-    MongoModule, MysqlModule, AuthModule],
-  controllers: [StarwarsController],
-  providers:
-    [
-      FilmService,
-      {
-        provide: FILM_REPOSITORY,
-        useClass: HybridFilmRepository
-      },
-      StarWarsService,
-      JwtAuthGuard,
-      {
-        provide: STARWARS_REPOSITORY,
-        useClass: StarwarsApiRest
-      }
-    ],
-  exports: [FILM_REPOSITORY]
-
+    AuthModule,
+    StarwarsModule
+  ],
+  controllers: [AuthController, StarwarsController]
 })
 export class AppModule { }
-
-/*
- imports: [
-           mongoose_1.MongooseModule.forRoot(process.env.MONGO_PROTOCOL + "://" + process.env.MONGO_DATABASE + ":" + process.env.MONGO_PASWWORD + "@" + process.env.MONGO_CLUSTER, {
-               minPoolSize: 1,
-               maxPoolSize: 2,
-               maxIdleTimeMS: 5 * 60 * 1000,
-               dbName: process.env.MONGO_SCHEMA,
-               autoIndex: false
-           })
-       ],
- */

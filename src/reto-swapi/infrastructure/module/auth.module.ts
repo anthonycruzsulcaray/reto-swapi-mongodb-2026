@@ -4,9 +4,9 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from '../../application/service/auth.service';
 import { ACCESS_TOKEN_PROVIDER } from '../../domain/repository/access-token.provider';
 import { AUTHENTICATION_REPOSITORY } from '../../domain/repository/authentication.repository';
-import { AuthController } from '../controllers/auth.controller';
 import { MysqlAuthenticationRepository } from '../repository/mysql-authentication.repository';
 import { JwtAccessTokenProvider } from '../service/jwt-access-token.provider';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { MysqlModule } from './mysql.module';
 
 @Module({
@@ -23,9 +23,9 @@ import { MysqlModule } from './mysql.module';
             }),
         }),
     ],
-    controllers: [AuthController],
     providers: [
         AuthService,
+        JwtAuthGuard,
         {
             provide: AUTHENTICATION_REPOSITORY,
             useClass: MysqlAuthenticationRepository,
@@ -35,6 +35,6 @@ import { MysqlModule } from './mysql.module';
             useClass: JwtAccessTokenProvider,
         },
     ],
-    exports: [JwtModule],
+    exports: [AuthService, JwtAuthGuard, JwtModule],
 })
 export class AuthModule {}

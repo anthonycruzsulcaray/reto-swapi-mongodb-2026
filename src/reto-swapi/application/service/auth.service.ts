@@ -27,7 +27,6 @@ export class AuthService {
         if (Buffer.byteLength(password, 'utf8') > 72) {
             throw new BadRequestException('Password must not exceed 72 bytes');
         }
-
         const transaction_uuid = uuid.v4();
         const normalizedName = name.trim();
         const normalizedEmail = email.trim().toLowerCase();
@@ -39,17 +38,19 @@ export class AuthService {
                 email: normalizedEmail,
                 passwordHash,
             });
-            return this.toPublicUser(user);
+            const AuthUserResponse: PublicAuthUser = {
+                id: user.id,
+                uuid: user.uuid,
+                name: user.name,
+                email: user.email
+            }
+            return AuthUserResponse;
         } catch (error) {
             if (error instanceof UserAlreadyExistsError) {
                 throw new ConflictException('An account with this email already exists');
             }
             throw error;
         }
-    }
-
-    private toPublicUser(user: AuthUser): PublicAuthUser {
-        return { id: user.id, uuid: user.uuid, name: user.name, email: user.email };
     }
 
     async login(email: string, password: string): Promise<AuthTokenResponse> {
