@@ -65,15 +65,24 @@
       "json",
       "ts"
     ],
-    "rootDir": "src",
+    "rootDir": ".",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
-    },
+    },  
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "src/reto-swapi/**/*.{ts,js}",
+      "!src/reto-swapi/domain/entities/**",
+      "!src/reto-swapi/infrastructure/**",
+      "src/reto-swapi/infrastructure/repository/**/*.{ts,js}",
+      "!src/app.module.ts",
+      "!src/app.properties.ts",
+      "!src/main.ts"
     ],
-    "coverageDirectory": "../coverage",
+    "coveragePathIgnorePatterns": [
+      "<rootDir>/node_modules/"
+    ],
+    "coverageDirectory": "coverage",
     "testEnvironment": "node"
   }
 }

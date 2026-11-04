@@ -1,4 +1,10 @@
-import { ConflictException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+    BadRequestException,
+    ConflictException,
+    Inject,
+    Injectable,
+    UnauthorizedException,
+} from '@nestjs/common';
 import { compare, hash } from 'bcryptjs';
 import { AUTHENTICATION_REPOSITORY, UserAlreadyExistsError } from '../../domain/repository/authentication.repository';
 import { ACCESS_TOKEN_PROVIDER } from '../../domain/repository/access-token.provider';
@@ -18,6 +24,10 @@ export class AuthService {
     ) { }
 
     async register(name: string, email: string, password: string): Promise<PublicAuthUser> {
+        if (Buffer.byteLength(password, 'utf8') > 72) {
+            throw new BadRequestException('Password must not exceed 72 bytes');
+        }
+
         const transaction_uuid = uuid.v4();
         const normalizedName = name.trim();
         const normalizedEmail = email.trim().toLowerCase();

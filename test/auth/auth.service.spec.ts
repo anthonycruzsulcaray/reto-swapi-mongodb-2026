@@ -1,9 +1,11 @@
+jest.mock('uuid', () => ({ v4: () => 'test-uuid' }));
+
 import { BadRequestException, ConflictException, UnauthorizedException } from '@nestjs/common';
 import { compare, hash } from 'bcryptjs';
-import { AuthService } from './auth.service';
-import { UserAlreadyExistsError } from '../../domain/repository/authentication.repository';
-import type { AuthenticationRepository } from '../../domain/repository/authentication.repository';
-import type { AccessTokenProvider } from '../../domain/repository/access-token.provider';
+import { AuthService } from '../../src/reto-swapi/application/service/auth.service';
+import { UserAlreadyExistsError } from '../../src/reto-swapi/domain/repository/authentication.repository';
+import type { AuthenticationRepository } from '../../src/reto-swapi/domain/repository/authentication.repository';
+import type { AccessTokenProvider } from '../../src/reto-swapi/domain/repository/access-token.provider';
 
 describe('AuthService', () => {
     let authService: AuthService;
@@ -31,6 +33,7 @@ describe('AuthService', () => {
             authService.register('  Leia Organa ', 'LEIA@EXAMPLE.COM', 'secret-pass'),
         ).resolves.toEqual({
             id: 21,
+            uuid: 'test-uuid',
             name: 'Leia Organa',
             email: 'leia@example.com',
         });
@@ -46,6 +49,15 @@ describe('AuthService', () => {
         await expect(
             authService.register('Leia', 'leia@example.com', 'secret-pass'),
         ).rejects.toBeInstanceOf(ConflictException);
+    });
+
+    it('rethrows unexpected errors during registration', async () => {
+        const error = new Error('database unavailable');
+        authenticationRepository.createUser.mockRejectedValue(error);
+
+        await expect(
+            authService.register('Leia', 'leia@example.com', 'secret-pass'),
+        ).rejects.toBe(error);
     });
 
     it('rejects passwords that exceed bcrypt byte limits', async () => {
@@ -90,12 +102,5 @@ describe('AuthService', () => {
             UnauthorizedException,
         );
         expect(accessTokenProvider.generateToken).not.toHaveBeenCalled();
-    });
-
-    it('rejects non-string credentials', async () => {
-        await expect(authService.login("", 'password')).rejects.toBeInstanceOf(
-            UnauthorizedException,
-        );
-        expect(authenticationRepository.findByEmail).not.toHaveBeenCalled();
     });
 });

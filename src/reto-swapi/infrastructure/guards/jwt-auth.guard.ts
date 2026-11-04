@@ -17,10 +17,10 @@ interface AuthenticatedRequest extends Request {
 }
 
 interface JwtPayload {
-    id?: number;
-    uuid?: string;
-    name?: string;
-    email?: string;
+    id: number;
+    uuid: string;
+    name: string;
+    email: string;
 }
 
 @Injectable()
