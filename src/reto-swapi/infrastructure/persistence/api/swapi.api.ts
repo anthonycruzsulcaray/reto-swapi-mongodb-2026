@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom, Observable } from 'rxjs';
 import { StarwarsRepository } from "../../../domain/repository/starwars.repository";
-import { FilmBodyPagedEnglish, FilmBodyEnglish } from "../../../domain/entities/film.entities";
+import { ApiFilmPagedEnglish, FilmBodyEnglish } from "../../../domain/entities/film.entities";
 
 interface StarwarsHttpClient {
     get<T>(url: string): Observable<{ data: T }>;
@@ -15,10 +15,10 @@ export class StarwarsApiRest implements StarwarsRepository {
         private readonly httpService: StarwarsHttpClient,
     ) { }
 
-    async getListStarwars(): Promise<FilmBodyPagedEnglish> {
+    async getListStarwars(): Promise<ApiFilmPagedEnglish> {
         const url = `${process.env.API_URL_BASE}films`;
         const { data } = await firstValueFrom(
-            this.httpService.get<FilmBodyPagedEnglish>(url),
+            this.httpService.get<ApiFilmPagedEnglish>(url),
         );
         return data;
     }

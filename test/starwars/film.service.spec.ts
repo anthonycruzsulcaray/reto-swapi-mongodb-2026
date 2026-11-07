@@ -1,4 +1,4 @@
-import { FilmBodyEnglish, FilmBodyPaged } from '../../src/reto-swapi/domain/entities/film.entities';
+import { FilmBodyEnglish } from '../../src/reto-swapi/domain/entities/film.entities';
 import type { FilmRepository } from '../../src/reto-swapi/domain/repository/film.repository';
 import { FilmService } from '../../src/reto-swapi/application/service/film.service';
 
@@ -23,23 +23,26 @@ describe('FilmService', () => {
         edited: '1977-05-25T00:00:00.000Z',
         url: 'https://swapi.dev/api/films/1/',
     };
-    const films: FilmBodyPaged = { count: 1, pages: 1, results: [film] };
 
     beforeEach(() => {
         repository = {
-            getListFilms: jest.fn(),
+            getListFilmsByPaged: jest.fn(),
             getFilmById: jest.fn(),
             createFilm: jest.fn(),
         };
         service = new FilmService(repository);
     });
 
-    it('returns the repository film list and forwards headers', async () => {
+    it('builds the paged response from repository data', async () => {
         const headers = { authorization: 'Bearer token' };
-        repository.getListFilms.mockResolvedValue(films);
+        repository.getListFilmsByPaged.mockResolvedValue({ count: 11, films: [film] });
 
-        await expect(service.getListFilms(headers)).resolves.toBe(films);
-        expect(repository.getListFilms).toHaveBeenCalledWith(headers);
+        await expect(service.getListFilms(2, 5)).resolves.toEqual({
+            count: 11,
+            pages: 3,
+            results: [film],
+        });
+        expect(repository.getListFilmsByPaged).toHaveBeenCalledWith(2, 5);
     });
 
     it('returns a film by ID and forwards the ID', async () => {

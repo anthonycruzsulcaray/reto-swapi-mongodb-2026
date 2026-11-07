@@ -4,7 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from '../../application/service/auth.service';
 import { ACCESS_TOKEN_PROVIDER } from '../../domain/repository/access-token.provider';
 import { AUTHENTICATION_REPOSITORY } from '../../domain/repository/authentication.repository';
-import { MysqlAuthenticationRepository } from '../repository/mysql-authentication.repository';
+import { MysqlAuthenticationRepository } from '../repository/authentication.repository';
 import { JwtAccessTokenProvider } from '../service/jwt-access-token.provider';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { MysqlModule } from './mysql.module';

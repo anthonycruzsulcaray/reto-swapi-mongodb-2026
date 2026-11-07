@@ -1,6 +1,6 @@
 import {
     FilmBodyEnglish,
-    FilmBodyPagedEnglish,
+    ApiFilmPagedEnglish,
 } from '../../src/reto-swapi/domain/entities/film.entities';
 import type { StarwarsRepository } from '../../src/reto-swapi/domain/repository/starwars.repository';
 import { StarWarsService } from '../../src/reto-swapi/application/service/starwars.service';
@@ -26,7 +26,7 @@ describe('StarWarsService', () => {
         edited: '1977-05-25T00:00:00.000Z',
         url: 'https://swapi.dev/api/films/1/',
     };
-    const films: FilmBodyPagedEnglish = {
+    const films: ApiFilmPagedEnglish = {
         count: 1,
         next: null,
         previous: null,

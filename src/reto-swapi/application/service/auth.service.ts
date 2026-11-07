@@ -10,7 +10,7 @@ import { AUTHENTICATION_REPOSITORY, UserAlreadyExistsError } from '../../domain/
 import { ACCESS_TOKEN_PROVIDER } from '../../domain/repository/access-token.provider';
 import type { AuthenticationRepository } from '../../domain/repository/authentication.repository';
 import type { AccessTokenProvider } from '../../domain/repository/access-token.provider';
-import { AuthUser, PublicAuthUser } from '../../domain/entities/user-auth';
+import { PublicAuthUser } from '../../domain/entities/user-auth';
 import { AuthTokenResponse } from '../../domain/entities/token-auth';
 import * as uuid from 'uuid';
 

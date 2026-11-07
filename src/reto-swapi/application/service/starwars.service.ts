@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { FilmBodyEnglish, FilmBodyPagedEnglish } from "../../domain/entities/film.entities";
+import { FilmBodyEnglish, ApiFilmPagedEnglish } from "../../domain/entities/film.entities";
 import type { StarwarsRepository } from "../../domain/repository/starwars.repository";
 import { STARWARS_REPOSITORY } from "../../domain/repository/starwars.repository";
 
@@ -10,7 +10,7 @@ export class StarWarsService {
         private readonly starwarsRepository: StarwarsRepository
     ) { }
 
-    async getListStarwars(): Promise<FilmBodyPagedEnglish> {
+    async getListStarwars(): Promise<ApiFilmPagedEnglish> {
         return await this.starwarsRepository.getListStarwars();
     }
     

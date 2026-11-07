@@ -1,9 +1,14 @@
 
-export class FilmBodyPagedEnglish {
+export class ApiFilmPagedEnglish {
     count: number
     next: string | null
     previous: string | null
     results: FilmBodyEnglish[]
+}
+
+export class PagedFilms {
+  count: number;
+  films: FilmBodyEnglish[];
 }
 
 export class FilmBodyPaged {
@@ -11,7 +16,6 @@ export class FilmBodyPaged {
     pages: number
     results: FilmBodyEnglish[]
 }
-
 
 export class FilmBodyEnglish {
     id: number

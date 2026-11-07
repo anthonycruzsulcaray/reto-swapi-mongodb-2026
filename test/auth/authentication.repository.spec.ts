@@ -7,7 +7,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthUser, RegisterAuthUser } from '../../src/reto-swapi/domain/entities/user-auth';
 import { UserAlreadyExistsError } from '../../src/reto-swapi/domain/repository/authentication.repository';
 import { AuthQueryMysql } from '../../src/reto-swapi/infrastructure/persistence/mysql/query/auth.query';
-import { MysqlAuthenticationRepository } from '../../src/reto-swapi/infrastructure/repository/mysql-authentication.repository';
+import { MysqlAuthenticationRepository } from '../../src/reto-swapi/infrastructure/repository/authentication.repository';
 
 describe('MysqlAuthenticationRepository', () => {
     let module: TestingModule;
