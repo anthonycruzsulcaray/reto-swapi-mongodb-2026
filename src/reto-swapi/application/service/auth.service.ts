@@ -66,7 +66,13 @@ export class AuthService {
             name: user.name,
             email: user.email,
         });
-        return { ...token, tokenType: 'Bearer' };
+        
+        const responseData: AuthTokenResponse = {
+            accessToken: token.accessToken,
+            tokenType: 'Bearer',
+            expiresIn: token.expiresIn,
+        }
+        return responseData;
     }
 
 }

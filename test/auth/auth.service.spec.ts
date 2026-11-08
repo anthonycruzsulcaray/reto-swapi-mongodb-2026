@@ -39,6 +39,12 @@ describe('AuthService', () => {
         });
 
         const [createdUser] = authenticationRepository.createUser.mock.calls[0];
+        expect(createdUser).toEqual({
+            uuid: 'test-uuid',
+            name: 'Leia Organa',
+            email: 'leia@example.com',
+            passwordHash: expect.any(String),
+        });
         expect(createdUser.passwordHash).not.toBe('secret-pass');
         await expect(compare('secret-pass', createdUser.passwordHash)).resolves.toBe(true);
     });
@@ -46,9 +52,9 @@ describe('AuthService', () => {
     it('rejects duplicate email registration', async () => {
         authenticationRepository.createUser.mockRejectedValue(new UserAlreadyExistsError());
 
-        await expect(
-            authService.register('Leia', 'leia@example.com', 'secret-pass'),
-        ).rejects.toBeInstanceOf(ConflictException);
+        await expect(authService.register('Leia', 'leia@example.com', 'secret-pass')).rejects.toThrow(
+            new ConflictException('An account with this email already exists'),
+        );
     });
 
     it('rethrows unexpected errors during registration', async () => {
@@ -60,10 +66,10 @@ describe('AuthService', () => {
         ).rejects.toBe(error);
     });
 
-    it('rejects passwords that exceed bcrypt byte limits', async () => {
+    it('rejects UTF-8 passwords that exceed bcrypt byte limits', async () => {
         await expect(
             authService.register('Leia', 'leia@example.com', 'é'.repeat(37)),
-        ).rejects.toBeInstanceOf(BadRequestException);
+        ).rejects.toThrow(new BadRequestException('Password must not exceed 72 bytes'));
         expect(authenticationRepository.createUser).not.toHaveBeenCalled();
     });
 
@@ -95,12 +101,43 @@ describe('AuthService', () => {
         });
     });
 
-    it('rejects invalid credentials without issuing a token', async () => {
+    it('rejects login when the account does not exist', async () => {
         authenticationRepository.findByEmail.mockResolvedValue(null);
 
-        await expect(authService.login('leia@example.com', 'wrong')).rejects.toBeInstanceOf(
-            UnauthorizedException,
+        await expect(authService.login('leia@example.com', 'secret-pass')).rejects.toThrow(
+            new UnauthorizedException('Invalid credentials'),
         );
         expect(accessTokenProvider.generateToken).not.toHaveBeenCalled();
+    });
+
+    it('rejects login when the password is incorrect', async () => {
+        const passwordHash = await hash('secret-pass', 4);
+        authenticationRepository.findByEmail.mockResolvedValue({
+            id: 21,
+            uuid: 'user-uuid',
+            name: 'Leia Organa',
+            email: 'leia@example.com',
+            passwordHash,
+        });
+
+        await expect(authService.login('leia@example.com', 'wrong-password')).rejects.toThrow(
+            new UnauthorizedException('Invalid credentials'),
+        );
+        expect(accessTokenProvider.generateToken).not.toHaveBeenCalled();
+    });
+
+    it('propagates token provider errors', async () => {
+        const passwordHash = await hash('secret-pass', 4);
+        const error = new Error('token provider unavailable');
+        authenticationRepository.findByEmail.mockResolvedValue({
+            id: 21,
+            uuid: 'user-uuid',
+            name: 'Leia Organa',
+            email: 'leia@example.com',
+            passwordHash,
+        });
+        accessTokenProvider.generateToken.mockRejectedValue(error);
+
+        await expect(authService.login('leia@example.com', 'secret-pass')).rejects.toBe(error);
     });
 });

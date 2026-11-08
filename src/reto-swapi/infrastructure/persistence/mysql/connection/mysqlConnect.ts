@@ -9,7 +9,7 @@ export class MysqlConfig {
     ) { }
 
     conn(database?: string): ServerlessMysql {
-        let configParameters = this.configService.get("mysqlParamters");
+        let configParameters = this.configService.get("mysqlParameters");
         if (database) {
             configParameters.database = database;
         }

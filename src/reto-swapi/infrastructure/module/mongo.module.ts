@@ -9,11 +9,11 @@ import { FilmQueryMongoDB } from '../persistence/mongodb/query/film.query';
         MongooseModule.forRootAsync({
             inject: [ConfigService],
             useFactory: (configService: ConfigService) => ({
-                uri: 'mongodb://localhost:27017',
+                uri: configService.getOrThrow<string>('mongoParameters.uri'),
+                dbName: configService.getOrThrow<string>('mongoParameters.dbName'),
                 minPoolSize: 1,
                 maxPoolSize: 2,
                 maxIdleTimeMS: 5 * 60 * 1000,
-                dbName: configService.getOrThrow<string>('mongoParamters.dbName'),
                 autoIndex: false,
             }),
         }),
@@ -30,16 +30,3 @@ import { FilmQueryMongoDB } from '../persistence/mongodb/query/film.query';
     ]
 })
 export class MongoModule { }
-
-
-/*
- imports: [
-           mongoose_1.MongooseModule.forRoot(process.env.MONGO_PROTOCOL + "://" + process.env.MONGO_DATABASE + ":" + process.env.MONGO_PASWWORD + "@" + process.env.MONGO_CLUSTER, {
-               minPoolSize: 1,
-               maxPoolSize: 2,
-               maxIdleTimeMS: 5 * 60 * 1000,
-               dbName: process.env.MONGO_SCHEMA,
-               autoIndex: false
-           })
-       ],
- */
