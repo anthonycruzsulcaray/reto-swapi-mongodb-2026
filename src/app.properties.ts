@@ -1,10 +1,10 @@
 export default () => ({
     mysqlParameters: {
-        host: process.env.HOST,
-        port: Number(process.env.PORT),
-        user: process.env.USER_DB,
-        password: process.env.PASSWORD_DB,
-        database: process.env.DATABASE
+        host: process.env.MYSQL_HOST,
+        port: Number(process.env.MYSQL_PORT),
+        user: process.env.MYSQL_USER_DB,
+        password: process.env.MYSQL_PASSWORD_DB,
+        database: process.env.MYSQL_DATABASE
     },
     mongoParameters: {
         uri: process.env.MONGO_URI,
