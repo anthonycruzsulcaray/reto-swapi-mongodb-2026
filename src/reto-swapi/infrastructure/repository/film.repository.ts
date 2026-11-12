@@ -1,58 +1,29 @@
 import { Injectable } from "@nestjs/common";
-import { FilmBodyEnglish, FilmBodyPaged } from "../../domain/entities/film.entities";
+import { FilmBodyEnglish, PagedFilms } from "../../domain/entities/film.entities";
 import { FilmMongo } from "../persistence/mongodb/schemas/film.schema";
 import { FilmQueryMongoDB } from "../persistence/mongodb/query/film.query";
 import { FilmRepository } from "../../domain/repository/film.repository";
 import { FilmQueryMysql } from "../persistence/mysql/query/film.query";
-import { v4 as uuidv4 } from 'uuid';
-import { JoiValidationPipe } from "../utils/validation"
-import { CreateFilmSchema, PageFilterSchema } from "../validation/film.validation";
+import { FilmMapper } from "../mapper/film.mapper";
 
 @Injectable()
 export class HybridFilmRepository implements FilmRepository {
     constructor(
         private readonly filmMongoDB: FilmQueryMongoDB,
-        private readonly filmMysql: FilmQueryMysql
+        private readonly filmMysql: FilmQueryMysql,
     ) { }
 
-    async getListFilms(headers: any): Promise<FilmBodyPaged> {
-        let idTransaccion = uuidv4();
-        let page: number = Number(headers.page ?? 1)
-        let size: number = Number(headers.size ?? 10)
-        new JoiValidationPipe(PageFilterSchema).transform({ page, size }, idTransaccion)
-
-        let response: FilmBodyPaged = {
-            count: 0,
-            pages: 0,
-            results: []
-        }
-        const totalRecord = (await this.filmMongoDB.getCountTotalFilms());
-        const totalNumberPages = Math.ceil(totalRecord / size);
-        const filmResponse: FilmMongo[] = (await this.filmMongoDB.getListFilmsByPaged(page, size));
-
-        response.count = totalRecord
-        response.pages = totalNumberPages
-
-        filmResponse.forEach(data => {
-            response.results.push({
-                id: data.id,
-                episode_id: data.episode_id,
-                title: data.title,
-                opening_crawl: data.opening_crawl,
-                director: data.director,
-                producer: data.producer,
-                release_date: data.release_date,
-                characters: data.characters,
-                planets: data.planets,
-                starships: data.starships,
-                vehicles: data.vehicles,
-                species: data.species,
-                created: data.created,
-                edited: data.edited,
-                url: data.url
-            })
-        });
-        return response
+    async getListFilmsByPaged(page: number, size: number): Promise<PagedFilms> {
+        const [count, filmDocuments] = await Promise.all([
+            this.filmMongoDB.getCountTotalFilms(),
+            this.filmMongoDB.getListFilmsByPaged(page, size),
+        ]);
+        const films: FilmMongo[] = filmDocuments;
+        const responseData: PagedFilms = {
+            count,
+            films: films.map(FilmMapper.toFilmBody),
+        };
+        return responseData;
     }
 
     async getFilmById(filmId: number): Promise<FilmBodyEnglish | null> {
@@ -60,30 +31,11 @@ export class HybridFilmRepository implements FilmRepository {
         if (film === null) {
             return null
         }
-        const response: FilmBodyEnglish = {
-            id: film.id,
-            episode_id: film.episode_id,
-            title: film.title,
-            opening_crawl: film.opening_crawl,
-            director: film.director,
-            producer: film.producer,
-            release_date: film.release_date,
-            characters: film.characters,
-            planets: film.planets,
-            starships: film.starships,
-            vehicles: film.vehicles,
-            species: film.species,
-            created: film.created,
-            edited: film.edited,
-            url: film.url
-        }
-        return response
+        const responseData: FilmBodyEnglish = FilmMapper.toFilmBody(film);
+        return responseData;
     }
 
     async createFilm(requestBody: FilmBodyEnglish): Promise<FilmBodyEnglish | null> {
-        let idTransaccion = uuidv4();
-        new JoiValidationPipe(CreateFilmSchema).transform({ ...requestBody }, idTransaccion)
-
         let conn = (await this.filmMysql.init()).transaction()
         try {
             conn = this.filmMysql.addFilm(requestBody, conn)
@@ -115,5 +67,4 @@ export class HybridFilmRepository implements FilmRepository {
             throw error
         }
     }
-
 }

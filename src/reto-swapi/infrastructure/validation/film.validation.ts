@@ -1,8 +1,12 @@
 import Joi from "joi";
 
 export const PageFilterSchema = Joi.object({
-    page: Joi.number().min(1).optional(),
-    size: Joi.number().min(1).optional(),
+    page: Joi.number().min(1).required(),
+    size: Joi.number().min(1).required(),
+})
+
+export const IdFilmSchema = Joi.object({
+    id: Joi.number().min(1).required()
 })
 
 export const CreateFilmSchema = Joi.object({

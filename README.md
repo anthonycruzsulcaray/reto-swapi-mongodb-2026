@@ -32,6 +32,55 @@
 $ npm install
 ```
 
+## Registro y autenticación
+
+Antes de iniciar la aplicación, crea la base y tabla de usuarios ejecutando
+`database/auth-schema.sql` en MySQL. La base de autenticación se llama `swapi_auth`.
+La conexión usa `HOST`, `PORT`, `USER_DB` y `PASSWORD_DB` ya configurados para MySQL
+en este proyecto.
+
+El endpoint público `POST /auth/register` recibe nombre, email y contraseña:
+
+```json
+{
+  "name": "Nombre de usuario",
+  "email": "usuario@example.com",
+  "password": "una-contraseña-segura"
+}
+```
+
+El email debe ser único y la contraseña tener al menos 8 caracteres y un máximo de
+72 bytes para ser compatible con bcrypt. Se guarda
+como hash bcrypt, nunca en texto plano. El endpoint público `POST /auth/login` recibe
+el email y contraseña registrados:
+
+```json
+{
+  "email": "usuario@example.com",
+  "password": "una-contraseña-segura"
+}
+```
+
+Configura `JWT_SECRET` con una clave aleatoria de al menos 32 bytes.
+`JWT_EXPIRATION_SECONDS` es opcional y tiene un valor predeterminado de 900 segundos.
+El login devuelve `accessToken`, `tokenType` y `expiresIn`; el payload del token incluye
+`id`, `uuid`, `name` y `email` del usuario, y se verifica su firma HS256 y expiración.
+
+Ejemplo de uso:
+
+```bash
+curl -X POST http://localhost:3000/auth/register \
+  -H "Content-Type: application/json" \
+  -d "{\"name\":\"Nombre de usuario\",\"email\":\"usuario@example.com\",\"password\":\"una-contraseña-segura\"}"
+
+curl -X POST http://localhost:3000/auth/login \
+  -H "Content-Type: application/json" \
+  -d "{\"email\":\"usuario@example.com\",\"password\":\"una-contraseña-segura\"}"
+
+curl http://localhost:3000/starwars/api/films \
+  -H "Authorization: Bearer <accessToken>"
+```
+
 ## Compile and run the project
 
 ```bash

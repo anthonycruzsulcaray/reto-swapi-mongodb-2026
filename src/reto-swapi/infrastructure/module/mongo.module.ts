@@ -1,14 +1,22 @@
 import { Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { FilmMongo, FilmShchema } from '../persistence/mongodb/schemas/film.schema';
-// import { FilmMongoRepository } from '../persistence/mongodb/repository/film.mongodb.repository';
-import { FILM_REPOSITORY } from '../../domain/repository/film.repository';
 import { FilmQueryMongoDB } from '../persistence/mongodb/query/film.query';
-import { HybridFilmRepository } from '../repository/film.repository';
-
 
 @Module({
     imports: [
+        MongooseModule.forRootAsync({
+            inject: [ConfigService],
+            useFactory: (configService: ConfigService) => ({
+                uri: configService.getOrThrow<string>('mongoParameters.uri'),
+                dbName: configService.getOrThrow<string>('mongoParameters.dbName'),
+                minPoolSize: 1,
+                maxPoolSize: 2,
+                maxIdleTimeMS: 5 * 60 * 1000,
+                autoIndex: false,
+            }),
+        }),
         MongooseModule.forFeature([
             { name: FilmMongo.name, schema: FilmShchema }
         ])
