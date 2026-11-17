@@ -1,0 +1,167 @@
+COMANDOS DOCKER DEL PROYECTO
+============================
+
+Ejecuta los comandos desde la carpeta raiz del proyecto. Docker Desktop debe
+estar iniciado. El archivo .env debe contener los valores del entorno elegido.
+API_PORT_DOCKER controla la interfaz/puerto local de la API; API_PORT controla
+el puerto/interfaz de la API en el Compose principal de produccion.
+
+IMPORTANTE
+----------
+- docker-compose.yml es el Compose principal de PRODUCCION: inicia solo la API
+  y conecta con MySQL/MongoDB externos.
+- docker-compose.dev.yml es para DESARROLLO local: inicia API, MySQL y MongoDB
+  en contenedores.
+- No subas ni compartas .env. Para pruebas, usa credenciales y bases de staging;
+  no conectes pruebas locales a bases con datos de produccion.
+- Los nombres de proyecto swapi-dev y swapi-prod mantienen separados los
+  contenedores y volumenes de cada entorno.
+
+
+DESARROLLO LOCAL: docker-compose.dev.yml
+----------------------------------------
+
+Validar el Compose, sin iniciar servicios:
+
+   docker compose -p swapi-dev -f docker-compose.dev.yml config --quiet
+
+Construir la API e iniciar API, MySQL y MongoDB mostrando logs:
+
+   docker compose -p swapi-dev -f docker-compose.dev.yml up --build
+
+En primer plano, detener con Ctrl+C.
+
+Construir e iniciar en segundo plano:
+
+   docker compose -p swapi-dev -f docker-compose.dev.yml up --build -d
+
+Ver estado:
+
+   docker compose -p swapi-dev -f docker-compose.dev.yml ps
+
+Seguir todos los logs o solo los de un servicio:
+
+   docker compose -p swapi-dev -f docker-compose.dev.yml logs -f
+   docker compose -p swapi-dev -f docker-compose.dev.yml logs -f api
+   docker compose -p swapi-dev -f docker-compose.dev.yml logs -f mysql
+   docker compose -p swapi-dev -f docker-compose.dev.yml logs -f mongodb
+
+Salir del seguimiento con Ctrl+C. Si se iniciaron con -d, los servicios siguen
+ejecutandose.
+
+Detener los contenedores y conservarlos junto con sus datos:
+
+   docker compose -p swapi-dev -f docker-compose.dev.yml stop
+
+Volver a iniciar los contenedores detenidos:
+
+   docker compose -p swapi-dev -f docker-compose.dev.yml start
+
+Detener y eliminar contenedores y red, conservando los datos de las bases:
+
+   docker compose -p swapi-dev -f docker-compose.dev.yml down
+
+BORRAR PERMANENTEMENTE los volumenes y todos los datos locales de MySQL y
+MongoDB:
+
+   docker compose -p swapi-dev -f docker-compose.dev.yml down -v
+
+No ejecutar down -v salvo que se quieran eliminar los datos.
+
+
+PUBLICAR LA IMAGEN DE LA API EN DOCKER HUB
+------------------------------------------
+
+Repositorio usado en estos ejemplos:
+
+   4824351/reto-swapi-mongodb-2026
+
+Antes de publicar:
+- Crear el repositorio en Docker Hub con ese nombre.
+- No incluir .env, contrasenas, tokens ni claves en la imagen.
+- Si el repositorio es privado, EC2 tambien necesitara iniciar sesion para
+  descargar la imagen.
+
+1. Construir la imagen de produccion localmente:
+
+   docker compose -p swapi-prod build api
+
+   Compose crea localmente la imagen swapi-prod-api:latest.
+
+2. Iniciar sesion en Docker Hub. Docker pedira la autenticacion; no escribir
+   contrasenas o tokens directamente en el comando:
+
+   docker login --username 4824351
+
+3. Etiquetar la imagen local con el nombre del repositorio de Docker Hub:
+
+   docker image tag swapi-prod-api:latest 4824351/reto-swapi-mongodb-2026:latest
+
+4. Publicar (push) la imagen:
+
+   docker push 4824351/reto-swapi-mongodb-2026:latest
+
+5. En EC2, descargar (pull) la imagen publicada:
+
+   docker pull 4824351/reto-swapi-mongodb-2026:latest
+
+Si el repositorio de Docker Hub es privado, ejecutar `docker login --username
+4824351` en EC2 antes del pull. Mantener los secretos de la aplicacion en un
+archivo .env protegido o en un gestor de secretos; nunca dentro de la imagen.
+
+Nota: despues de publicar una nueva version con la etiqueta latest, EC2 debe
+ejecutar `docker pull` otra vez y recrear el contenedor para usar esa version.
+Usar etiquetas versionadas (por ejemplo, :1.0.0) ayuda a identificar y revertir
+versiones.
+
+
+PRODUCCION / STAGING: docker-compose.yml (archivo predeterminado)
+----------------------------------------------------------------
+
+Este Compose inicia solo la API. RDS y MongoDB Atlas deben existir, tener los
+esquemas/tablas necesarios y aceptar conexiones desde el equipo donde se ejecuta
+la API.
+
+Validar configuracion, sin iniciar la API ni conectarse a las bases:
+
+   docker compose -p swapi-prod config --quiet
+
+Construir la imagen de la API, sin iniciarla ni conectarse a las bases:
+
+   docker compose -p swapi-prod build api
+
+Construir e iniciar la API en segundo plano. Este comando intenta conectarse a
+las bases externas:
+
+   docker compose -p swapi-prod up --build -d
+
+Iniciar en primer plano y mostrar los logs:
+
+   docker compose -p swapi-prod up --build
+
+Ver estado y seguir logs de la API:
+
+   docker compose -p swapi-prod ps
+   docker compose -p swapi-prod logs -f api
+
+Salir del seguimiento con Ctrl+C. Si se iniciaron con -d, la API sigue activa.
+
+Detener y eliminar el contenedor y la red:
+
+   docker compose -p swapi-prod down
+
+Este Compose no tiene volumenes de bases de datos; down no elimina datos de RDS
+ni de Atlas.
+
+Prueba local de staging en Windows: el Compose principal publica el puerto de
+la API en todas las interfaces por defecto. Para limitarlo a localhost:3000,
+usar PowerShell:
+
+   $env:API_PORT = '127.0.0.1:3000'
+   docker compose -p swapi-prod up --build -d
+   Remove-Item Env:API_PORT
+
+La API quedara en http://localhost:3000. En EC2, proteger el acceso con el
+grupo de seguridad y preferentemente un balanceador.
+
+

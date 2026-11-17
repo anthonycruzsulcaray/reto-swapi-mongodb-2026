@@ -94,15 +94,15 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
-## Docker local
+## Docker local de desarrollo
 
 1. Si no tienes `.env`, copia `.env.example` a `.env`; si ya existe, agrega las
    variables que falten sin reemplazar tus valores. Usa contraseñas y `JWT_SECRET`
    propios. No subas `.env` al repositorio.
-2. Desde la raíz del proyecto, ejecuta:
+2. Desde la raíz del proyecto, inicia el Compose local explícitamente:
 
    ```bash
-   docker compose up --build
+   docker compose -p swapi-dev -f docker-compose.dev.yml up --build
    ```
 
 3. La API queda disponible en `http://localhost:3000`. MySQL y MongoDB corren en
@@ -111,13 +111,14 @@ $ npm run start:prod
    que use el puerto `3306`. La API dentro de Docker usa `mysql:3306`; ese puerto
    interno es distinto del publicado en Windows.
 
-MySQL carga los SQL existentes solo cuando su volumen está vacío. El SQL de
-autenticación inserta un usuario de muestra; revísalo y no uses ese registro como
-dato inicial de producción. Los datos de ambas bases se conservan en volúmenes
-al detener los contenedores con `docker compose down`; borrar los volúmenes
-también elimina esos datos. Puedes conectar Workbench a `localhost` en el puerto
-de `MYSQL_PORT_DOCKER` con el usuario indicado por `MYSQL_USER_DB_LOCAL`, y
-Studio 3T a `localhost` en el puerto `MONGO_PORT_DOCKER`.
+El Compose de desarrollo crea la base `MYSQL_DATABASE_LOCAL`, pero no carga
+automáticamente los archivos SQL ni crea `swapi_auth`; importa los esquemas
+necesarios desde Workbench, conectado a `localhost` en el puerto de
+`MYSQL_PORT_DOCKER`, antes de probar los endpoints. Los datos de ambas bases se
+conservan en volúmenes al detener los contenedores con
+`docker compose -p swapi-dev -f docker-compose.dev.yml down`; `down -v` también
+elimina permanentemente esos datos. Studio 3T se conecta a `localhost` en el
+puerto de `MONGO_PORT_DOCKER`.
 
 Esta configuración es para desarrollo local. Para EC2, primero construye y
 prueba la imagen de la API; en producción recomiendo usar Amazon RDS para MySQL
@@ -126,21 +127,29 @@ del mismo EC2. Guarda secretos en AWS Secrets Manager o Systems Manager
 Parameter Store, no en la imagen ni en el repositorio, y limita los puertos de
 las bases a la red privada.
 
-### Compose para EC2 con bases administradas
+### Compose principal para producción (EC2)
 
 Para conectar la API de EC2 a RDS y MongoDB Atlas sin iniciar bases de datos en
 EC2, usa las variables sin sufijo `_LOCAL` de `.env` y ejecuta:
 
 ```bash
-docker compose -f docker-compose.prod.yml up --build -d
+docker compose -p swapi-prod up --build -d
 ```
 
-Este Compose inicia solo la API y mapea `MYSQL_HOST`, `MYSQL_PORT`,
+El archivo predeterminado `docker-compose.yml` inicia solo la API y mapea
+`MYSQL_HOST`, `MYSQL_PORT`,
 `MYSQL_USER_DB`, `MYSQL_PASSWORD_DB`, `MYSQL_DATABASE`, `MONGO_URI`, `MONGO_DB`
 y la configuración JWT desde `.env`. En AWS, permite el acceso a RDS desde el
 grupo de seguridad de EC2 y configura la lista de acceso de Atlas para la
 conexión de EC2. Para tráfico público, limita el puerto de la API en el grupo de
 seguridad o colócala detrás de un balanceador.
+
+Para ver los logs: `docker compose -p swapi-prod logs -f api`. Para detener y
+eliminar el contenedor: `docker compose -p swapi-prod down`.
+En EC2, configura `API_PORT` para que coincida con la interfaz/puerto que debe
+publicar Docker; un valor que enlace solo a `127.0.0.1` permite acceso local en
+la instancia, por ejemplo desde un proxy inverso, pero no directamente desde
+Internet.
 
 ## Run tests
 

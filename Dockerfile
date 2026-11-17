@@ -1,3 +1,4 @@
+# 1 etapa - compilación 
 FROM node:24-alpine AS build
 
 WORKDIR /app
@@ -8,14 +9,14 @@ RUN npm install
 COPY nest-cli.json tsconfig*.json ./
 COPY src ./src
 RUN npm run build
-
+# 2 etapa - prepara dependencias
 FROM node:24-alpine AS production-dependencies
 
 WORKDIR /app
 
 COPY package*.json ./
 RUN npm install --omit=dev && npm cache clean --force
-
+# 3 etapa - inicia la api
 FROM node:24-alpine AS runtime
 
 ENV NODE_ENV=production

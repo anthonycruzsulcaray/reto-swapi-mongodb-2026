@@ -1,0 +1,72 @@
+# Local development Compose: API, MySQL, and MongoDB.
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${API_PORT_DOCKER:-127.0.0.1:3000}:3000"
+    environment:
+      API_URL_BASE: ${API_URL_BASE}
+      MYSQL_HOST: mysql
+      MYSQL_PORT: "3306"
+      MYSQL_USER_DB: ${MYSQL_USER_DB_LOCAL}
+      MYSQL_PASSWORD_DB: ${MYSQL_PASSWORD_DB_LOCAL}
+      MYSQL_DATABASE: ${MYSQL_DATABASE_LOCAL}
+      MONGO_URI: ${MONGO_URI_DOCKER}
+      MONGO_DB: ${MONGO_DB}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION_SECONDS: ${JWT_EXPIRATION_SECONDS:-900}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD_DB_LOCAL}
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_DATABASE: ${MYSQL_DATABASE_LOCAL}
+    ports:
+      - "127.0.0.1:${MYSQL_PORT_DOCKER:-3307}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'mysqladmin ping -h 127.0.0.1 -uroot -p"$$MYSQL_ROOT_PASSWORD" --silent',
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 2
+    restart: unless-stopped
+
+  mongodb:
+    image: mongo:8
+    ports:
+      - "127.0.0.1:${MONGO_PORT_DOCKER:-27018}:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'mongosh --quiet --eval "db.adminCommand(''ping'').ok" >/dev/null 2>&1',
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 2
+    logging:
+      driver: local
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: unless-stopped
+
+volumes:
+  mysql-data:
+  mongo-data:
