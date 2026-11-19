@@ -19,7 +19,7 @@ RUN npm install --omit=dev && npm cache clean --force
 # 3 etapa - inicia la api
 FROM node:24-alpine AS runtime
 
-ENV NODE_ENV=production
+# ENV NODE_ENV=production
 WORKDIR /app
 
 COPY --from=production-dependencies --chown=node:node /app/node_modules ./node_modules

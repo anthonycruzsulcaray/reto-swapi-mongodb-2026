@@ -19,9 +19,9 @@ services:
       JWT_EXPIRATION_SECONDS: ${JWT_EXPIRATION_SECONDS:-900}
     depends_on:
       mysql:
-        condition: service_healthy
+        condition: service_started
       mongodb:
-        condition: service_healthy
+        condition: service_started
     restart: unless-stopped
 
   mysql:
@@ -34,15 +34,6 @@ services:
       - "127.0.0.1:${MYSQL_PORT_DOCKER:-3307}:3306"
     volumes:
       - mysql-data:/var/lib/mysql
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          'mysqladmin ping -h 127.0.0.1 -uroot -p"$$MYSQL_ROOT_PASSWORD" --silent',
-        ]
-      interval: 5s
-      timeout: 5s
-      retries: 2
     restart: unless-stopped
 
   mongodb:
@@ -51,15 +42,6 @@ services:
       - "127.0.0.1:${MONGO_PORT_DOCKER:-27018}:27017"
     volumes:
       - mongo-data:/data/db
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          'mongosh --quiet --eval "db.adminCommand(''ping'').ok" >/dev/null 2>&1',
-        ]
-      interval: 5s
-      timeout: 5s
-      retries: 2
     logging:
       driver: local
       options:
